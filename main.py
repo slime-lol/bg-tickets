@@ -13,10 +13,11 @@ class CloseTicketButton(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.danger, custom_id="close_ticket")
-    async def close(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def close(interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message("Closing ticket in 5 seconds...")
-        time.sleep(5)
+        await asyncio.sleep(5)
         await interaction.channel.delete()
+
 
 class SupportTicket(discord.ui.View):
     def __init__(self):
@@ -67,7 +68,7 @@ class ModeratorTicket(discord.ui.View):
             await channel.send(embed=embed, view=CloseTicketButton())
             await interaction.response.send_message(f"I've opened a ticket here: {channel.mention}", ephemeral=True)
 
-@bot.command()
+@bot.tree.command()
 @commands.has_permissions(administrator=True)
 async def ticketing(interaction: discord.Interaction, ticket_type):
     if ticket_type == "support_team":
@@ -101,6 +102,7 @@ async def ticketing(interaction: discord.Interaction, ticket_type):
 @bot.event
 async def on_ready():
     print("Logged in as ", bot.user)
+    await bot.tree.sync()
     bot.add_view(ModeratorTicket())
     bot.add_view(SupportTicket())
     bot.add_view(CloseTicketButton())
